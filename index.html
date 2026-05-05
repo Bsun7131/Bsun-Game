@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html>
 <head>
   <title>Catch Game</title>
@@ -12,7 +12,7 @@
       background: #222;
       color: white;
       overflow: hidden;
-      touch-action: none;
+      touch-action: auto;
     }
 
     h1 {
@@ -28,7 +28,7 @@
       background: #111;
       border: 3px solid white;
       max-width: 95vw;
-      max-height: 75vh;
+      max-height: 70vh;
     }
 
     .buttons {
@@ -39,12 +39,18 @@
     }
 
     button {
-      font-size: 30px;
-      padding: 15px 35px;
+      font-size: 26px;
+      padding: 12px 30px;
       border-radius: 12px;
       border: none;
       background: #00c853;
       color: white;
+    }
+
+    #restartBtn {
+      display: none;
+      background: orange;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -57,6 +63,9 @@
 
   <canvas id="game" width="400" height="500"></canvas>
 
+  <br>
+  <button id="restartBtn">Restart</button>
+
   <div class="buttons">
     <button id="leftBtn">⬅️</button>
     <button id="rightBtn">➡️</button>
@@ -66,9 +75,9 @@
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const scoreText = document.getElementById("score");
-
     const leftBtn = document.getElementById("leftBtn");
     const rightBtn = document.getElementById("rightBtn");
+    const restartBtn = document.getElementById("restartBtn");
 
     let score = 0;
     let gameOver = false;
@@ -91,7 +100,6 @@
       speed: 4
     };
 
-    // PC keyboard controls
     document.addEventListener("keydown", function(event) {
       if (event.key === "ArrowLeft") moveLeft = true;
       if (event.key === "ArrowRight") moveRight = true;
@@ -102,43 +110,33 @@
       if (event.key === "ArrowRight") moveRight = false;
     });
 
-    // Phone button controls
-    leftBtn.addEventListener("touchstart", function(event) {
-      event.preventDefault();
+    leftBtn.addEventListener("touchstart", function(e) {
+      e.preventDefault();
       moveLeft = true;
     });
 
-    leftBtn.addEventListener("touchend", function(event) {
-      event.preventDefault();
+    leftBtn.addEventListener("touchend", function(e) {
+      e.preventDefault();
       moveLeft = false;
     });
 
-    rightBtn.addEventListener("touchstart", function(event) {
-      event.preventDefault();
+    rightBtn.addEventListener("touchstart", function(e) {
+      e.preventDefault();
       moveRight = true;
     });
 
-    rightBtn.addEventListener("touchend", function(event) {
-      event.preventDefault();
+    rightBtn.addEventListener("touchend", function(e) {
+      e.preventDefault();
       moveRight = false;
     });
 
-    // Mouse controls for buttons too
-    leftBtn.addEventListener("mousedown", function() {
-      moveLeft = true;
-    });
+    leftBtn.addEventListener("mousedown", () => moveLeft = true);
+    leftBtn.addEventListener("mouseup", () => moveLeft = false);
 
-    leftBtn.addEventListener("mouseup", function() {
-      moveLeft = false;
-    });
+    rightBtn.addEventListener("mousedown", () => moveRight = true);
+    rightBtn.addEventListener("mouseup", () => moveRight = false);
 
-    rightBtn.addEventListener("mousedown", function() {
-      moveRight = true;
-    });
-
-    rightBtn.addEventListener("mouseup", function() {
-      moveRight = false;
-    });
+    restartBtn.addEventListener("click", restartGame);
 
     function drawPlayer() {
       ctx.fillStyle = "lime";
@@ -151,13 +149,8 @@
     }
 
     function movePlayer() {
-      if (moveLeft && player.x > 0) {
-        player.x -= player.speed;
-      }
-
-      if (moveRight && player.x + player.width < canvas.width) {
-        player.x += player.speed;
-      }
+      if (moveLeft && player.x > 0) player.x -= player.speed;
+      if (moveRight && player.x + player.width < canvas.width) player.x += player.speed;
     }
 
     function moveBlock() {
@@ -175,6 +168,7 @@
 
       if (block.y > canvas.height) {
         gameOver = true;
+        restartBtn.style.display = "inline-block";
       }
     }
 
@@ -188,9 +182,24 @@
       ctx.fillStyle = "white";
       ctx.font = "32px Arial";
       ctx.fillText("Game Over", 115, 240);
+    }
 
-      ctx.font = "18px Arial";
-      ctx.fillText("Refresh page to play again", 90, 275);
+    function restartGame() {
+      score = 0;
+      scoreText.textContent = score;
+      gameOver = false;
+      moveLeft = false;
+      moveRight = false;
+
+      player.x = 170;
+      player.y = 460;
+
+      block.x = Math.random() * (canvas.width - block.width);
+      block.y = 0;
+      block.speed = 4;
+
+      restartBtn.style.display = "none";
+      gameLoop();
     }
 
     function gameLoop() {
@@ -211,4 +220,4 @@
   </script>
 
 </body>
-</html>     
+</html>
