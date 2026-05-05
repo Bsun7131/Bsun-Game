@@ -1,37 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Simple Catch Game</title>
+  <title>Catch Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
+      margin: 0;
       text-align: center;
       font-family: Arial, sans-serif;
       background: #222;
       color: white;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 10px 0 5px;
+    }
+
+    p {
+      margin: 5px;
     }
 
     canvas {
       background: #111;
       border: 3px solid white;
-      margin-top: 20px;
+      max-width: 95vw;
+      max-height: 75vh;
+    }
+
+    .buttons {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    button {
+      font-size: 30px;
+      padding: 15px 35px;
+      border-radius: 12px;
+      border: none;
+      background: #00c853;
+      color: white;
     }
   </style>
 </head>
+
 <body>
 
   <h1>Catch the Falling Blocks</h1>
-  <p>Move with ← and → keys. Catch the red blocks!</p>
+  <p>PC: Use ← → keys | Phone: Use buttons</p>
   <p>Score: <span id="score">0</span></p>
 
   <canvas id="game" width="400" height="500"></canvas>
+
+  <div class="buttons">
+    <button id="leftBtn">⬅️</button>
+    <button id="rightBtn">➡️</button>
+  </div>
 
   <script>
     const canvas = document.getElementById("game");
     const ctx = canvas.getContext("2d");
     const scoreText = document.getElementById("score");
 
+    const leftBtn = document.getElementById("leftBtn");
+    const rightBtn = document.getElementById("rightBtn");
+
     let score = 0;
     let gameOver = false;
+    let moveLeft = false;
+    let moveRight = false;
 
     const player = {
       x: 170,
@@ -49,14 +91,53 @@
       speed: 4
     };
 
-    let keys = {};
-
+    // PC keyboard controls
     document.addEventListener("keydown", function(event) {
-      keys[event.key] = true;
+      if (event.key === "ArrowLeft") moveLeft = true;
+      if (event.key === "ArrowRight") moveRight = true;
     });
 
     document.addEventListener("keyup", function(event) {
-      keys[event.key] = false;
+      if (event.key === "ArrowLeft") moveLeft = false;
+      if (event.key === "ArrowRight") moveRight = false;
+    });
+
+    // Phone button controls
+    leftBtn.addEventListener("touchstart", function(event) {
+      event.preventDefault();
+      moveLeft = true;
+    });
+
+    leftBtn.addEventListener("touchend", function(event) {
+      event.preventDefault();
+      moveLeft = false;
+    });
+
+    rightBtn.addEventListener("touchstart", function(event) {
+      event.preventDefault();
+      moveRight = true;
+    });
+
+    rightBtn.addEventListener("touchend", function(event) {
+      event.preventDefault();
+      moveRight = false;
+    });
+
+    // Mouse controls for buttons too
+    leftBtn.addEventListener("mousedown", function() {
+      moveLeft = true;
+    });
+
+    leftBtn.addEventListener("mouseup", function() {
+      moveLeft = false;
+    });
+
+    rightBtn.addEventListener("mousedown", function() {
+      moveRight = true;
+    });
+
+    rightBtn.addEventListener("mouseup", function() {
+      moveRight = false;
     });
 
     function drawPlayer() {
@@ -70,11 +151,11 @@
     }
 
     function movePlayer() {
-      if (keys["ArrowLeft"] && player.x > 0) {
+      if (moveLeft && player.x > 0) {
         player.x -= player.speed;
       }
 
-      if (keys["ArrowRight"] && player.x + player.width < canvas.width) {
+      if (moveRight && player.x + player.width < canvas.width) {
         player.x += player.speed;
       }
     }
@@ -104,6 +185,33 @@
     }
 
     function drawGameOver() {
+      ctx.fillStyle = "white";
+      ctx.font = "32px Arial";
+      ctx.fillText("Game Over", 115, 240);
+
+      ctx.font = "18px Arial";
+      ctx.fillText("Refresh page to play again", 90, 275);
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!gameOver) {
+        movePlayer();
+        moveBlock();
+        drawPlayer();
+        drawBlock();
+        requestAnimationFrame(gameLoop);
+      } else {
+        drawGameOver();
+      }
+    }
+
+    gameLoop();
+  </script>
+
+</body>
+</html>    function drawGameOver() {
       ctx.fillStyle = "white";
       ctx.font = "32px Arial";
       ctx.fillText("Game Over", 115, 240);
