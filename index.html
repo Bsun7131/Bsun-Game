@@ -1,109 +1,121 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Simple Catch Game</title>
-  <style>
-    body {
-      text-align: center;
-      font-family: Arial, sans-serif;
-      background: #222;
-      color: white;
-    }
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreText = document.getElementById("score");
 
-    canvas {
-      background: #111;
-      border: 3px solid white;
-      margin-top: 20px;
-    }
-  </style>
-</head>
-<body>
+let score = 0;
+let gameOver = false;
 
-  <h1>Catch the Falling Blocks</h1>
-  <p>Move with ← and → keys. Catch the red blocks!</p>
-  <p>Score: <span id="score">0</span></p>
+const player = {
+  x: 170,
+  y: 460,
+  width: 60,
+  height: 20,
+  speed: 7
+};
 
-  <canvas id="game" width="400" height="500"></canvas>
+const block = {
+  x: Math.random() * 360,
+  y: 0,
+  width: 40,
+  height: 40,
+  speed: 4
+};
 
-  <script>
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
-    const scoreText = document.getElementById("score");
+let moveLeft = false;
+let moveRight = false;
 
-    let score = 0;
-    let gameOver = false;
+// Keyboard (PC)
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") moveLeft = true;
+  if (e.key === "ArrowRight") moveRight = true;
+});
 
-    const player = {
-      x: 170,
-      y: 460,
-      width: 60,
-      height: 20,
-      speed: 7
-    };
+document.addEventListener("keyup", e => {
+  if (e.key === "ArrowLeft") moveLeft = false;
+  if (e.key === "ArrowRight") moveRight = false;
+});
 
-    const block = {
-      x: Math.random() * 360,
-      y: 0,
-      width: 40,
-      height: 40,
-      speed: 4
-    };
+// Touch (Mobile)
+canvas.addEventListener("touchstart", e => {
+  const touchX = e.touches[0].clientX;
+  if (touchX < window.innerWidth / 2) {
+    moveLeft = true;
+  } else {
+    moveRight = true;
+  }
+});
 
-    let keys = {};
+canvas.addEventListener("touchend", () => {
+  moveLeft = false;
+  moveRight = false;
+});
 
-    document.addEventListener("keydown", function(event) {
-      keys[event.key] = true;
-    });
+function drawPlayer() {
+  ctx.fillStyle = "lime";
+  ctx.fillRect(player.x, player.y, player.width, player.height);
+}
 
-    document.addEventListener("keyup", function(event) {
-      keys[event.key] = false;
-    });
+function drawBlock() {
+  ctx.fillStyle = "red";
+  ctx.fillRect(block.x, block.y, block.width, block.height);
+}
 
-    function drawPlayer() {
-      ctx.fillStyle = "lime";
-      ctx.fillRect(player.x, player.y, player.width, player.height);
-    }
+function movePlayer() {
+  if (moveLeft && player.x > 0) {
+    player.x -= player.speed;
+  }
+  if (moveRight && player.x + player.width < canvas.width) {
+    player.x += player.speed;
+  }
+}
 
-    function drawBlock() {
-      ctx.fillStyle = "red";
-      ctx.fillRect(block.x, block.y, block.width, block.height);
-    }
+function moveBlock() {
+  block.y += block.speed;
 
-    function movePlayer() {
-      if (keys["ArrowLeft"] && player.x > 0) {
-        player.x -= player.speed;
-      }
+  if (
+    block.y + block.height >= player.y &&
+    block.x < player.x + player.width &&
+    block.x + block.width > player.x
+  ) {
+    score++;
+    scoreText.textContent = score;
+    resetBlock();
+  }
 
-      if (keys["ArrowRight"] && player.x + player.width < canvas.width) {
-        player.x += player.speed;
-      }
-    }
+  if (block.y > canvas.height) {
+    gameOver = true;
+  }
+}
 
-    function moveBlock() {
-      block.y += block.speed;
+function resetBlock() {
+  block.x = Math.random() * (canvas.width - block.width);
+  block.y = 0;
+  block.speed += 0.3;
+}
 
-      if (
-        block.y + block.height >= player.y &&
-        block.x < player.x + player.width &&
-        block.x + block.width > player.x
-      ) {
-        score++;
-        scoreText.textContent = score;
-        resetBlock();
-      }
+function drawGameOver() {
+  ctx.fillStyle = "white";
+  ctx.font = "32px Arial";
+  ctx.fillText("Game Over", 115, 240);
+}
 
-      if (block.y > canvas.height) {
-        gameOver = true;
-      }
-    }
+function gameLoop() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function resetBlock() {
-      block.x = Math.random() * (canvas.width - block.width);
-      block.y = 0;
-      block.speed += 0.3;
-    }
+  if (!gameOver) {
+    movePlayer();
+    moveBlock();
+    drawPlayer();
+    drawBlock();
+    requestAnimationFrame(gameLoop);
+  } else {
+    drawGameOver();
+  }
+}
 
-    function drawGameOver() {
+gameLoop();
+</script>    function drawGameOver() {
       ctx.fillStyle = "white";
       ctx.font = "32px Arial";
       ctx.fillText("Game Over", 115, 240);
