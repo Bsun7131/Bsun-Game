@@ -130,6 +130,33 @@
   </script>
 
 </body>
+</html>    function drawGameOver() {
+      ctx.fillStyle = "white";
+      ctx.font = "32px Arial";
+      ctx.fillText("Game Over", 115, 240);
+
+      ctx.font = "18px Arial";
+      ctx.fillText("Refresh the page to play again", 85, 275);
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (!gameOver) {
+        movePlayer();
+        moveBlock();
+        drawPlayer();
+        drawBlock();
+        requestAnimationFrame(gameLoop);
+      } else {
+        drawGameOver();
+      }
+    }
+
+    gameLoop();
+  </script>
+
+</body>
 </html>  if (!gameOver) {
     movePlayer();
     moveBlock();
